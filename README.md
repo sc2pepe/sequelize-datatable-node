@@ -41,7 +41,7 @@ This function takes three arguments to produce output for datatables.
 #### Example Usage
 
 ```js
-const datatable = require(`sequelize-datatable`);
+const datatable = require(`sequelize-datatables`);
 const model = require(`./path/to/sequelize-model`); // Sequelize model
 
 // assuming you are using express

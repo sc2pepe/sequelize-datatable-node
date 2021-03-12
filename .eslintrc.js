@@ -17,6 +17,7 @@ module.exports = {
     "object-shorthand": "off",
     "class-methods-use-this": "off",
     "no-continue": "off",
-    "no-await-in-loop": "warn"
+    "no-await-in-loop": "warn",
+    "linebreak-style": ["error", "windows"]
   }
 }

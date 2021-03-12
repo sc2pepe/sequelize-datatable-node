@@ -24,7 +24,7 @@ const paginate = config => {
   };
 };
 
-const search = async (model, config, modelName, opt) => {
+const search = async (model, config, modelName, from, opt) => {
   if (_.isUndefined(config.search) || !config.search.value) {
     return Promise.resolve({});
   }
@@ -33,9 +33,9 @@ const search = async (model, config, modelName, opt) => {
   const description = await describe(model);
 
   return _.concat(
-    searchBuilder.charSearch(modelName, description, config, opt, dialect),
-    searchBuilder.numericSearch(modelName, description, config, opt),
-    searchBuilder.booleanSearch(modelName, description, config, opt)
+    searchBuilder.charSearch(modelName, description, config, from, opt, dialect),
+    searchBuilder.numericSearch(modelName, description, config, from),
+    searchBuilder.booleanSearch(modelName, description, config, from)
   );
 };
 
@@ -45,7 +45,7 @@ const buildSearch = async (model, config, params, opt) => {
     return Promise.resolve({});
   }
 
-  const result = await Promise.map(leaves, leaf => search(leaf.model || model, config, leaf.as || ``, opt));
+  const result = await Promise.map(leaves, leaf => search(leaf.model || model, config, leaf.as || ``, leaf.from, opt));
 
   const objects = _.filter(result, res => _.isObject(res) && !_.isArray(res) && !_.isEmpty(res));
   const arrays = _.filter(result, res => _.isArray(res) && !_.isEmpty(res));
@@ -79,40 +79,45 @@ const buildOrder = (model, config, params) => {
     return [];
   }
 
-  const order = config.order[0];
-  const col = config.columns[order.column].data;
-  const leaves = helper.dfs(params, [], []);
+  const allOrders = [];
 
-  if (col.indexOf(`.`) > -1) {
-    const splitted = col.split(`.`);
-    const colName = splitted.pop();
+  config.order.forEach((order, index) => {
+    const col = config.columns[order.column].data;
+    const leaves = helper.dfs(params, [], []);
 
-    const orders = _.compact(
-      _.map(splitted, modelName => {
-        const found = _.filter(leaves, leaf => leaf.as === modelName)[0];
+    if (col.indexOf(`.`) > -1) {
+      const splitted = col.split(`.`);
+      const colName = splitted.pop();
 
-        if (!found) {
-          return false;
-        }
+      const orders = _.compact(
+        _.map(splitted, modelName => {
+          const found = _.filter(leaves, leaf => leaf.as === modelName)[0];
 
-        return {
-          model: found.model,
-          as: found.as
-        };
-      })
-    );
+          if (!found) {
+            return false;
+          }
 
-    if (orders.length < 1) {
-      return [];
+          return {
+            model: found.model,
+            as: found.as
+          };
+        })
+      );
+
+      if (orders.length < 1) {
+        return [];
+      }
+
+      orders.push(colName);
+      orders.push(order.dir.toUpperCase());
+
+      allOrders.push(orders);
+    } else {
+      allOrders.push([helper.getColumnName(col), order.dir.toUpperCase()]);
     }
+  });
 
-    orders.push(colName);
-    orders.push(order.dir.toUpperCase());
-
-    return orders;
-  }
-
-  return [helper.getColumnName(col), order.dir.toUpperCase()];
+  return allOrders;
 };
 
 const getResult = async (model, config, modelParams, opt) => {
@@ -132,7 +137,7 @@ const getResult = async (model, config, modelParams, opt) => {
 
   const orderResult = await buildOrder(model, config, params);
   if (orderResult.length > 0) {
-    params.order = [orderResult];
+    params.order = orderResult;
   }
 
   _.assign(params, paginate(config));

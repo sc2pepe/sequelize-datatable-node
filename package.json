@@ -1,11 +1,11 @@
 {
-  "name": "sequelize-datatables",
-  "version": "3.0.0",
-  "description": "Server-side datatables with sequelize",
+  "name": "@sc2pepe/sequelize-datatables",
+  "version": "3.0.2",
+  "description": "Fork from Server-side datatables with sequelize",
   "main": "src/index.js",
-  "author": "Alwin Arrasyid <alwin.ridd@gmail.com>",
+  "author": "Pepe Juárez <sc2pepe@gmail.com>",
   "bugs": {
-    "url": "https://github.com/alwint3r/sequelize-datatable-node/issues"
+    "url": "https://github.com/sc2pepe/sequelize-datatable-node/issues"
   },
   "engines": {
     "node": "^7.6.0 || ^10"
@@ -13,7 +13,7 @@
   "files": [
     "src"
   ],
-  "homepage": "https://github.com/alwint3r/sequelize-datatable-node/#readme",
+  "homepage": "https://github.com/sc2pepe/sequelize-datatable-node/#readme",
   "keywords": [
     "sequelize",
     "datatables"
@@ -21,7 +21,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alwint3r/sequelize-datatable-node.git"
+    "url": "git+https://github.com/sc2pepe/sequelize-datatable-node.git"
   },
   "scripts": {
     "lint": "eslint src test",
@@ -56,5 +56,8 @@
     "pg-native": "^1.10.0",
     "prettier": "^1.19.1",
     "rimraf": "^2.6.2"
+  },
+  "directories": {
+    "test": "test"
   }
 }

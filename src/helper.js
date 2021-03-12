@@ -28,7 +28,13 @@ const dfs = (node, stack, visited) => {
   visited.push(node);
 
   if (_.isArray(node.include) && node.include.length > 0) {
-    _.each(node.include, include => stack.push(include));
+    _.each(node.include, include => {
+      if (node.as) {
+        include.from = `${node.from ? `${node.from}.` : ''}${node.as ? node.as : ''}`;
+      }
+
+      stack.push(include)
+    });
   }
 
   return dfs(stack.pop(), stack, visited);

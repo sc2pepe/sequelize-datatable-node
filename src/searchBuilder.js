@@ -31,15 +31,16 @@ const filterColumns = (modelName, config) => {
 const createNameMaps = columns => {
   return _.reduce(
     columns,
-    (acc, col) =>
-      _.merge(acc, {
-        [helper.getModelAndColumn(col.data).pop()]: col
-      }),
+    (acc, col) => {
+      return _.merge(acc, {
+        [col.data]: col
+      })
+    },
     {}
   );
 };
 
-const charSearch = (modelName, modelDesc, config, opt, dialect) => {
+const charSearch = (modelName, modelDesc, config, from, opt, dialect) => {
   const columns = filterColumns(modelName, config);
   const nameMaps = createNameMaps(columns);
 
@@ -48,7 +49,7 @@ const charSearch = (modelName, modelDesc, config, opt, dialect) => {
     .filter(item => {
       const isChar = isTypeExists(possibleStringTypes, modelDesc[item].type);
 
-      return isChar && nameMaps[item] && config.search.value;
+      return isChar && nameMaps[`${from ? `${from}.` : ''}${modelName ? `${modelName}.` : ''}${item}`] && config.search.value;
     })
     .value();
 
@@ -72,11 +73,11 @@ const charSearch = (modelName, modelDesc, config, opt, dialect) => {
   }
 
   return _.map(matchNames, name => ({
-    [helper.searchify(nameMaps[name].data)]: { [searchOp]: searchValue }
+    [helper.searchify(nameMaps[`${from ? `${from}.` : ''}${modelName ? `${modelName}.` : ''}${name}`].data)]: { [searchOp]: searchValue }
   }));
 };
 
-const numericSearch = (modelName, modelDesc, config) => {
+const numericSearch = (modelName, modelDesc, config, from) => {
   const columns = filterColumns(modelName, config);
   const nameMaps = createNameMaps(columns);
 
@@ -85,16 +86,16 @@ const numericSearch = (modelName, modelDesc, config) => {
     .filter(item => {
       const isNumeric = isTypeExists(possibleNumericTypes, modelDesc[item].type);
 
-      return isNumeric && nameMaps[item] && !_.isNaN(Number(config.search.value));
+      return isNumeric && nameMaps[`${from ? `${from}.` : ''}${modelName ? `${modelName}.` : ''}${item}`] && !_.isNaN(Number(config.search.value));
     })
     .value();
 
   return _.map(matchNames, name => ({
-    [helper.searchify(nameMaps[name].data)]: Number(config.search.value)
+    [helper.searchify(nameMaps[`${from ? `${from}.` : ''}${modelName ? `${modelName}.` : ''}${name}`].data)]: Number(config.search.value)
   }));
 };
 
-const booleanSearch = (modelName, modelDesc, config) => {
+const booleanSearch = (modelName, modelDesc, config, from) => {
   const columns = filterColumns(modelName, config);
   const nameMaps = createNameMaps(columns);
 
@@ -103,12 +104,12 @@ const booleanSearch = (modelName, modelDesc, config) => {
     .filter(item => {
       const isNumeric = possibleNumericTypes.indexOf(modelDesc[item].type) > -1;
 
-      return isNumeric && nameMaps[item] && helper.boolAlike(config.search.value);
+      return isNumeric && nameMaps[`${from ? `${from}.` : ''}${modelName ? `${modelName}.` : ''}${item}`] && helper.boolAlike(config.search.value);
     })
     .value();
 
   return _.map(matchNames, name => ({
-    [helper.searchify(nameMaps[name].data)]: helper.boolify(config.search.value)
+    [helper.searchify(nameMaps[`${from ? `${from}.` : ''}${modelName ? `${modelName}.` : ''}${name}`].data)]: helper.boolify(config.search.value)
   }));
 };
 
